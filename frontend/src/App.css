@@ -1,0 +1,73 @@
+/* ── Global Agrigo Variables & Reset ── */
+:root {
+  --ag-bg:          #080f09;
+  --ag-surface:     #0c1a0d;
+  --ag-card:        #0f2010;
+  --ag-border:      #1a3a1c;
+  --ag-border-mid:  #255228;
+  --ag-green:       #3ddc6e;
+  --ag-green-glow:  rgba(61,220,110,0.15);
+  --ag-green-dark:  #15803d;
+  --ag-green-deep:  #0f5c2e;
+  --ag-text:        #e8f5e9;
+  --ag-text-dim:    #8aab8c;
+  --ag-muted:       #8aab8c;
+  --ag-dim:         #3a5c3c;
+  --ag-red:         #ff4d4d;
+  --ag-red-bg:      #1f0a0a;
+  --ag-amber:       #ffb020;
+  --ag-cyan:        #00d4ff;
+  --ag-purple:      #b388ff;
+  --ag-teal:        #00e5c0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  background: #080f09;
+  color: #e8f5e9;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
