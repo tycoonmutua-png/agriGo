@@ -39,9 +39,9 @@ export default function Checkout() {
   }, [navigate]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (deliveryMethod === "delivery" && paymentMethod === "pay_on_pickup") setPaymentMethod("stk");
-  }, [deliveryMethod]);
+ useEffect(() => {
+  if (deliveryMethod === "delivery" && paymentMethod === "pay_on_pickup") setPaymentMethod("stk");
+}, [deliveryMethod, paymentMethod]);
 
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
