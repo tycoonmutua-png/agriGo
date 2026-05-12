@@ -1,11 +1,8 @@
 /* ================================================
-   Agrigo — Dashboard Layout Stylesheet
-   Place at: src/layouts/DashboardLayout.css
+   AgriGo — Dashboard Layout Stylesheet
    ================================================ */
 
-
 :root {
-  /* Core palette */
   --ag-bg:          #080f09;
   --ag-surface:     #0c1a0d;
   --ag-card:        #0f2010;
@@ -18,21 +15,17 @@
   --ag-text:        #e8f5e9;
   --ag-text-dim:    #8aab8c;
   --ag-dim:         #3a5c3c;
-
-  /* Accent colors */
   --ag-cyan:        #00d4ff;
   --ag-amber:       #ffb020;
   --ag-red:         #ff4d4d;
   --ag-purple:      #b388ff;
   --ag-teal:        #00e5c0;
 
-  /* Sidebar */
   --sidebar-w:      240px;
   --sidebar-w-sm:   68px;
   --sidebar-bg:     #060d07;
   --sidebar-border: #142016;
 
-  /* Transitions */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -58,16 +51,11 @@
   flex-direction: column;
   padding: 20px 12px;
   position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
+  top: 0; left: 0; bottom: 0;
   z-index: 100;
   transition: width 0.35s var(--ease-out-expo);
   overflow: hidden;
-
-  /* Subtle texture */
-  background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(61,220,110,0.06) 0%, transparent 60%);
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(61,220,110,0.06) 0%, transparent 60%);
 }
 
 .layout--collapsed .sidebar { width: var(--sidebar-w-sm); }
@@ -76,17 +64,28 @@
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 4px 6px 24px;
+  gap: 10px;
+  padding: 4px 6px 20px;
   border-bottom: 1px solid var(--sidebar-border);
   margin-bottom: 16px;
   overflow: hidden;
   white-space: nowrap;
 }
 
+/* ── Sidebar logo image — BIGGER & VISIBLE ── */
+.sidebar-logo-img {
+  width: 44px;          /* ← bigger than before (was 36px) */
+  height: 44px;
+  border-radius: 10px;
+  object-fit: contain;  /* show full logo */
+  flex-shrink: 0;
+  background: #0c1a0d;
+  padding: 3px;
+  border: 1px solid var(--sidebar-border);
+}
+
 .sidebar-logo-icon {
-  width: 36px;
-  height: 36px;
+  width: 36px; height: 36px;
   flex-shrink: 0;
 }
 
@@ -110,10 +109,8 @@
 /* ── Toggle ── */
 .sidebar-toggle {
   position: absolute;
-  top: 20px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
+  top: 20px; right: 10px;
+  width: 28px; height: 28px;
   background: none;
   border: 1px solid var(--sidebar-border);
   border-radius: 8px;
@@ -158,11 +155,7 @@
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s,
-    transform 0.15s var(--ease-spring);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s var(--ease-spring);
   text-align: left;
   width: 100%;
 }
@@ -184,19 +177,16 @@
 
 .nav-active-bar {
   position: absolute;
-  right: 0;
-  top: 50%;
+  right: 0; top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 60%;
+  width: 3px; height: 60%;
   background: var(--ag-green);
   border-radius: 3px 0 0 3px;
   box-shadow: 0 0 8px var(--ag-green);
 }
 
 .nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 20px; height: 20px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -247,7 +237,7 @@
   min-height: 100vh;
 }
 
-/* ── Scrollbar styling ── */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--ag-bg); }
 ::-webkit-scrollbar-thumb { background: var(--ag-border); border-radius: 6px; }
@@ -256,8 +246,7 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .sidebar { width: var(--sidebar-w-sm); }
-  .sidebar-logo-text,
-  .nav-label { opacity: 0; pointer-events: none; }
+  .sidebar-logo-text, .nav-label { opacity: 0; pointer-events: none; }
   .layout-main { margin-left: var(--sidebar-w-sm); }
   .sidebar-toggle { display: none; }
 }

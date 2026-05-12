@@ -37,6 +37,19 @@ const NAV = [
     ),
   },
   {
+    path: "/staff-approval",
+    label: "Staff Approval",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+        <path d="M16 3.13a4 4 0 010 7.75"/>
+        <polyline points="16 11 18 13 22 9"/>
+      </svg>
+    ),
+  },
+  {
     path: "/customers",
     label: "Customers",
     icon: (
@@ -89,7 +102,6 @@ export default function DashboardLayout() {
   const [pageKey, setPageKey]     = useState(location.pathname);
   const prevPath  = useRef(location.pathname);
 
-  // Update page key on route change for transition
   useEffect(() => {
     if (location.pathname !== prevPath.current) {
       prevPath.current = location.pathname;
@@ -110,24 +122,17 @@ export default function DashboardLayout() {
   return (
     <div className={`layout ${collapsed ? "layout--collapsed" : ""}`}>
 
-      {/* ── SIDEBAR ── */}
+      {/* SIDEBAR */}
       <aside className="sidebar">
+
         {/* Logo */}
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">
-            <svg viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="16" r="16" fill="url(#lg)"/>
-              <defs>
-                <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
-                  <stop offset="0%" stopColor="#15803d"/>
-                  <stop offset="100%" stopColor="#4ade80"/>
-                </linearGradient>
-              </defs>
-              <path d="M16 8c0 0-6 4-6 9a6 6 0 0012 0c0-5-6-9-6-9z" fill="white" opacity="0.9"/>
-              <path d="M16 14v8M13 18l3-4 3 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          {!collapsed && <span className="sidebar-logo-text">Agrigo</span>}
+          <img
+            src="/logo.png"
+            alt="AgriGo"
+            className="sidebar-logo-img"
+          />
+          {!collapsed && <span className="sidebar-logo-text">AgriGo</span>}
         </div>
 
         {/* Collapse toggle */}
@@ -175,7 +180,7 @@ export default function DashboardLayout() {
         </div>
       </aside>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* MAIN CONTENT */}
       <main className="layout-main">
         <div key={pageKey} className="page-transition">
           <Outlet />

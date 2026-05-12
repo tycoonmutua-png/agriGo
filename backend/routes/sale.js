@@ -5,9 +5,8 @@ const Sale = require("../models/Sale");
 const Product = require("../models/Product");
 
 
-// =======================
+
 // CREATE SALE
-// =======================
 router.post("/", async (req, res) => {
 
   try {
@@ -52,9 +51,8 @@ router.post("/", async (req, res) => {
 });
 
 
-// =======================
+
 // GET SALES
-// =======================
 router.get("/", async (req, res) => {
 
   const sales = await Sale.find().populate("product");

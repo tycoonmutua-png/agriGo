@@ -2,30 +2,44 @@ import { useState } from "react";
 import API from "../services/api";
 import "./SharedPage.css";
 
-export default function Profile() {
-  const [saved, setSaved] = useState(false);
-
-  let user = {};
+const getUserFromToken = () => {
   try {
     const token = sessionStorage.getItem("token");
-    if (token) user = JSON.parse(atob(token.split(".")[1]));
-  } catch {}
+    if (!token) return {};
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch { return {}; }
+};
+
+const ROLE_LABELS = {
+  admin:   { label: "Administrator", emoji: "🛡️", color: "#4ade80" },
+  farmer:  { label: "Farmer",        emoji: "🌾", color: "#fbbf24" },
+  user:    { label: "Customer",      emoji: "👤", color: "#818cf8" },
+};
+
+export default function Profile() {
+  const user = getUserFromToken();
+  const roleInfo = ROLE_LABELS[user.role] || ROLE_LABELS.user;
 
   const [form, setForm] = useState({
-    name: user.name || "",
-    email: user.email || "",
-    phone: "",
+    name:            user.name  || "",
+    email:           user.email || "",
+    phone:           user.phone || "",
     currentPassword: "",
-    newPassword: "",
+    newPassword:     "",
   });
+  const [saved, setSaved]   = useState(false);
+  const [error, setError]   = useState("");
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setError("");
     try {
-      await API.put("/auth/profile", form).catch(() => {});
+      await API.put("/auth/profile", form);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch {}
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update profile.");
+    }
   };
 
   return (
@@ -33,28 +47,39 @@ export default function Profile() {
       <div className="sp-header">
         <div>
           <h1 className="sp-title">Profile</h1>
-          <p className="sp-sub">Manage your admin account</p>
+          <p className="sp-sub">Manage your account details</p>
         </div>
       </div>
 
       <div className="sp-settings-grid">
         <div className="sp-settings-card">
+
+          {/* Avatar + role badge */}
           <div className="sp-profile-avatar">
             <div className="sp-big-avatar">
-              {(form.name || form.email || "A")[0].toUpperCase()}
+              {(form.name || form.email || "U")[0].toUpperCase()}
             </div>
             <div>
-              <p className="sp-profile-name">{form.name || "Admin"}</p>
-              <p className="sp-profile-role">Administrator · Agrigo</p>
+              <p className="sp-profile-name">{form.name || "User"}</p>
+              <p className="sp-profile-role" style={{ color: roleInfo.color }}>
+                {roleInfo.emoji} {roleInfo.label} · AgriGo
+              </p>
             </div>
           </div>
 
+          {error && (
+            <div style={{ background: "rgba(255,77,77,0.1)", border: "1px solid rgba(255,77,77,0.3)", borderRadius: "8px", padding: "10px 14px", color: "#ff4d4d", fontSize: "0.85rem", marginBottom: "16px" }}>
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSave}>
-            <h2 className="sp-section-title" style={{ marginBottom:"16px" }}>Account Details</h2>
+            <h2 className="sp-section-title" style={{ marginBottom: "16px" }}>Account Details</h2>
+
             {[
-              { label:"Full Name", key:"name",  type:"text",  placeholder:"Your name" },
-              { label:"Email",     key:"email", type:"email", placeholder:"admin@agrigo.co.ke" },
-              { label:"Phone",     key:"phone", type:"tel",   placeholder:"+254 700 000 000" },
+              { label: "Full Name", key: "name",  type: "text",  placeholder: "Your name" },
+              { label: "Email",     key: "email", type: "email", placeholder: "you@example.com" },
+              { label: "Phone",     key: "phone", type: "tel",   placeholder: "+254 700 000 000" },
             ].map(f => (
               <div className="sp-field" key={f.key}>
                 <label className="sp-label">{f.label}</label>
@@ -68,10 +93,10 @@ export default function Profile() {
               </div>
             ))}
 
-            <h2 className="sp-section-title" style={{ margin:"24px 0 16px" }}>Change Password</h2>
+            <h2 className="sp-section-title" style={{ margin: "24px 0 16px" }}>Change Password</h2>
             {[
-              { label:"Current Password", key:"currentPassword" },
-              { label:"New Password",     key:"newPassword" },
+              { label: "Current Password", key: "currentPassword" },
+              { label: "New Password",     key: "newPassword" },
             ].map(f => (
               <div className="sp-field" key={f.key}>
                 <label className="sp-label">{f.label}</label>
@@ -85,7 +110,7 @@ export default function Profile() {
               </div>
             ))}
 
-            <button type="submit" className="sp-btn-primary" style={{ marginTop:"8px" }}>
+            <button type="submit" className="sp-btn-primary" style={{ marginTop: "8px" }}>
               {saved ? "✓ Saved!" : "Update Profile"}
             </button>
           </form>

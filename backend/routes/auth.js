@@ -1,114 +1,64 @@
 const express = require("express");
-const router = express.Router();
+const router  = express.Router();
+const {
+  registerUser,
+  registerStaff,
+  loginUser,
+  googleAuth,
+  facebookAuth,
+  getAllStaff,
+  approveStaff,
+} = require("../controllers/authController");
+const { protect } = require("../middleware/authMiddleware");
 
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+// ── Public routes ─────────────────────────────────────────────────
+router.post("/register",         registerUser);   // customer register
+router.post("/register/staff",   registerStaff);  // staff application
+router.post("/login",            loginUser);
+router.post("/google",           googleAuth);
+router.post("/facebook",         facebookAuth);
 
-const User = require("../models/User");
+// ── Admin only routes ─────────────────────────────────────────────
 
+// GET /api/auth/staff/all  — used by StaffApproval.js
+router.get("/staff/all",         protect, getAllStaff);
 
-// ===============================
-// REGISTER USER
-// ===============================
-router.post("/register", async (req, res) => {
-
+// GET /api/auth/staff/pending  — used by DashboardLayout badge
+router.get("/staff/pending",     protect, async (req, res) => {
+  const User = require("../models/User");
   try {
-
-    const { name, email, password } = req.body;
-
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists"
-      });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = new User({
-      name,
-      email,
-      password: hashedPassword
-    });
-
-    await user.save();
-
-    res.status(201).json({
-      message: "User registered successfully",
-      user
-    });
-
-  } catch (error) {
-
-    res.status(500).json({
-      error: error.message
-    });
-
+    const pending = await User.find({
+      isStaff: true,
+      $or: [{ status: "pending" }, { approved: false }],
+    }).select("-password");
+    res.json(pending);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
 });
 
-
-// ===============================
-// LOGIN USER
-// ===============================
-router.post("/login", async (req, res) => {
-
+// PATCH /api/auth/staff/:id/status  — used by StaffApproval.js approve/reject buttons
+router.patch("/staff/:id/status", protect, async (req, res) => {
+  const User = require("../models/User");
   try {
-
-    const { email, password } = req.body;
-
-    // Find user
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({
-        message: "Invalid email or password"
-      });
+    const { status } = req.body; // "active" | "rejected" | "suspended"
+    if (!["active", "rejected", "suspended"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value." });
     }
-
-    // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid email or password"
-      });
-    }
-
-    // Create token
-    const token = jwt.sign(
-      {
-        id: user._id
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d"
-      }
-    );
-
-    res.json({
-      message: "Login successful",
-      token,
-      user
-    });
-
-  } catch (error) {
-
-    res.status(500).json({
-      error: error.message
-    });
-
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { status, approved: status === "active" },
+      { new: true }
+    ).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found." });
+    const label = status === "active" ? "approved" : status;
+    res.json({ message: `Staff ${label} successfully.`, user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
 });
 
+// PUT /api/auth/staff/:id/approve  — legacy route (kept for compatibility)
+router.put("/staff/:id/approve",  protect, approveStaff);
 
-// ===============================
-// EXPORT ROUTER
-// ===============================
 module.exports = router;

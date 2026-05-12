@@ -1,46 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./auth.css";
 
-const ROLES = [
-  { id: "farmer", label: "Farmer", icon: "🌱" },
-  { id: "buyer", label: "Buyer", icon: "🛒" },
-  { id: "supplier", label: "Supplier", icon: "🚚" },
-  { id: "expert", label: "Expert", icon: "🔬" },
-];
-
 export default function Register() {
   const navigate = useNavigate();
-  const [role, setRole] = useState("farmer");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [county, setCounty] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [agreed, setAgreed] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!agreed) {
-      setError("Please accept the Terms of Service to continue.");
-      return;
-    }
-    setError("");
-    setLoading(true);
-    try {
-      // Replace with your actual API call, e.g.:
-      // await api.post("/auth/register", { firstName, lastName, phone, email, password, role, county });
-      await new Promise((r) => setTimeout(r, 1200)); // remove this line
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="auth-page">
@@ -48,7 +11,7 @@ export default function Register() {
       <div className="auth-bg-leaf auth-bg-leaf--2" aria-hidden="true" />
       <div className="auth-bg-circle" aria-hidden="true" />
 
-      <div className="auth-card auth-card--register">
+      <div className="auth-card" style={{ maxWidth: 480 }}>
         {/* Header */}
         <div className="auth-reg-header">
           <button
@@ -64,12 +27,12 @@ export default function Register() {
               Create Account
             </h2>
             <p className="auth-subheading" style={{ marginBottom: 0 }}>
-              Join 12,000+ farmers on Agrigo
+              Join 12,000+ farmers on AgriGo
             </p>
           </div>
         </div>
 
-        {/* Stats banner */}
+        {/* Stats */}
         <div className="auth-stats-row">
           <div className="auth-stat">
             <span className="auth-stat-val">12k+</span>
@@ -85,179 +48,51 @@ export default function Register() {
           </div>
         </div>
 
-        {error && <div className="auth-error">{error}</div>}
+        <p
+          className="auth-label"
+          style={{ textAlign: "center", marginBottom: 16, marginTop: 8 }}
+        >
+          I want to register as
+        </p>
 
-        <form onSubmit={handleSubmit} className="auth-form" noValidate>
-          {/* Role selector */}
-          <div className="auth-field">
-            <label className="auth-label">I am a</label>
-            <div className="auth-role-row">
-              {ROLES.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  className={`auth-role-chip ${role === r.id ? "auth-role-chip--active" : ""}`}
-                  onClick={() => setRole(r.id)}
-                >
-                  <span className="auth-role-icon">{r.icon}</span>
-                  {r.label}
-                </button>
-              ))}
+        {/* Customer Option */}
+        <button
+          className="auth-register-choice"
+          onClick={() => navigate("/register/customer")}
+        >
+          <span className="auth-register-choice-icon">🛒</span>
+          <div style={{ flex: 1 }}>
+            <div className="auth-register-choice-title">Customer</div>
+            <div className="auth-register-choice-sub">
+              Farmer · Buyer · Supplier · Expert
+            </div>
+            <div className="auth-register-choice-badge auth-register-choice-badge--green">
+              ✓ Instant Access
             </div>
           </div>
+          <span className="auth-register-choice-arrow">→</span>
+        </button>
 
-          {/* Name row */}
-          <div className="auth-row-2">
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="firstName">
-                First name
-              </label>
-              <div className="auth-input-wrap">
-                <span className="auth-input-icon">👤</span>
-                <input
-                  id="firstName"
-                  type="text"
-                  className="auth-input"
-                  placeholder="John"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
+        {/* Staff Option */}
+        <button
+          className="auth-register-choice"
+          onClick={() => navigate("/register/staff")}
+          style={{ marginTop: 12 }}
+        >
+          <span className="auth-register-choice-icon">🏢</span>
+          <div style={{ flex: 1 }}>
+            <div className="auth-register-choice-title">Staff / Employee</div>
+            <div className="auth-register-choice-sub">
+              Stock Manager · Orders Manager · Sales Agent
             </div>
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="lastName">
-                Last name
-              </label>
-              <div className="auth-input-wrap">
-                <span className="auth-input-icon">👤</span>
-                <input
-                  id="lastName"
-                  type="text"
-                  className="auth-input"
-                  placeholder="Mwangi"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
+            <div className="auth-register-choice-badge auth-register-choice-badge--yellow">
+              ⏳ Requires Admin Approval
             </div>
           </div>
+          <span className="auth-register-choice-arrow">→</span>
+        </button>
 
-          <div className="auth-field">
-            <label className="auth-label" htmlFor="reg-email">
-              Email address
-            </label>
-            <div className="auth-input-wrap">
-              <span className="auth-input-icon">✉</span>
-              <input
-                id="reg-email"
-                type="email"
-                className="auth-input"
-                placeholder="farmer@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
-          </div>
-
-          <div className="auth-field">
-            <label className="auth-label" htmlFor="phone">
-              Phone number
-            </label>
-            <div className="auth-input-wrap">
-              <span className="auth-input-icon">📞</span>
-              <input
-                id="phone"
-                type="tel"
-                className="auth-input"
-                placeholder="+254 700 000 000"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="auth-field">
-            <label className="auth-label" htmlFor="county">
-              County / Region
-            </label>
-            <div className="auth-input-wrap">
-              <span className="auth-input-icon">📍</span>
-              <select
-                id="county"
-                className="auth-input auth-select"
-                value={county}
-                onChange={(e) => setCounty(e.target.value)}
-                required
-              >
-                <option value="">Select your county</option>
-                <option>Nairobi</option>
-                <option>Nakuru</option>
-                <option>Uasin Gishu</option>
-                <option>Meru</option>
-                <option>Kisumu</option>
-                <option>Machakos</option>
-                <option>Murang'a</option>
-                <option>Nyeri</option>
-                <option>Kiambu</option>
-                <option>Trans Nzoia</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="auth-field">
-            <label className="auth-label" htmlFor="reg-password">
-              Password
-            </label>
-            <div className="auth-input-wrap">
-              <span className="auth-input-icon">🔒</span>
-              <input
-                id="reg-password"
-                type="password"
-                className="auth-input"
-                placeholder="Min. 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-            </div>
-          </div>
-
-          {/* Terms */}
-          <label className="auth-terms">
-            <input
-              type="checkbox"
-              className="auth-checkbox"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-            />
-            <span className="auth-terms-text">
-              I agree to the{" "}
-              <span className="auth-link">Terms of Service</span> and{" "}
-              <span className="auth-link">Privacy Policy</span>
-            </span>
-          </label>
-
-          <button
-            type="submit"
-            className={`auth-btn-primary ${loading ? "auth-btn-loading" : ""}`}
-            disabled={loading}
-          >
-            {loading ? (
-              <span className="auth-spinner" aria-label="Creating account…" />
-            ) : (
-              "Create Account"
-            )}
-          </button>
-        </form>
-
-        <p className="auth-switch-text">
+        <p className="auth-switch-text" style={{ marginTop: 28 }}>
           Already have an account?{" "}
           <span
             className="auth-link"

@@ -2,9 +2,9 @@ const Product = require("../models/Product");
 const Sale = require("../models/Sale");
 
 
-// =====================================
+
 // DASHBOARD STATS
-// =====================================
+
 exports.getDashboardStats = async (req, res) => {
 
   try {

@@ -9,7 +9,6 @@ import "./Dashboard.css";
 const KES = (n) => `KES ${Number(n || 0).toLocaleString()}`;
 
 export default function Dashboard() {
-  const [stats, setStats]           = useState(null);
   const [products, setProducts]     = useState([]);
   const [orders, setOrders]         = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -17,11 +16,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      API.get("/dashboard/stats").catch(() => ({ data: null })),
       API.get("/products").catch(() => ({ data: [] })),
       API.get("/orders").catch(() => ({ data: [] })),
-    ]).then(([s, p, o]) => {
-      setStats(s.data);
+    ]).then(([p, o]) => {
       setProducts(Array.isArray(p.data) ? p.data : []);
       setOrders(Array.isArray(o.data) ? o.data : []);
       setLoading(false);
@@ -30,9 +27,9 @@ export default function Dashboard() {
 
   // Derived metrics
   const totalProducts  = products.length;
-  const totalRevenue   = stats?.totalRevenue  ?? orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
-  const totalOrders    = stats?.totalOrders   ?? orders.length;
-  const totalCustomers = stats?.totalCustomers ?? [...new Set(orders.map(o => o.userId))].length;
+  const totalRevenue   = orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
+  const totalOrders    = orders.length;
+  const totalCustomers = [...new Set(orders.map(o => o.userId))].length;
   const pendingOrders  = orders.filter(o => o.status === "pending").length;
   const lowStock       = products.filter(p => p.stock <= 10 && p.stock > 0);
   const outOfStock     = products.filter(p => p.stock === 0);
@@ -108,7 +105,7 @@ export default function Dashboard() {
       {/* ── TOP BAR ── */}
       <div className="db-topbar">
         <div>
-          <h1 className="db-title">🌿 AgriGo Dashboard</h1>
+          <h1 className="db-title">Dashboard</h1>
           <p className="db-subtitle">Welcome back — here's what's happening on your farm store</p>
         </div>
         <div className="db-topbar-right">

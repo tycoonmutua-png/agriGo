@@ -4,7 +4,7 @@ import Vendor from "../models/Vendor.js";
 const router = express.Router();
 
 
-// 🏪 Create Shop (Vendor registers shop)
+//Create Shop (Vendor registers shop)
 router.post("/create", async (req, res) => {
   try {
     const { userId, shopName, location } = req.body;
@@ -24,7 +24,7 @@ router.post("/create", async (req, res) => {
 });
 
 
-// 🛠 Admin approves vendor
+// Admin approves vendor
 router.put("/approve/:id", async (req, res) => {
   try {
     const vendor = await Vendor.findById(req.params.id);
@@ -43,7 +43,7 @@ router.put("/approve/:id", async (req, res) => {
 });
 
 
-// 📄 Get all vendors (for admin)
+//Get all vendors (for admin)
 router.get("/", async (req, res) => {
   const vendors = await Vendor.find().populate("user");
   res.json(vendors);

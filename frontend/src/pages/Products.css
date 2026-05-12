@@ -208,14 +208,14 @@
   font-size: 14px;
 }
 
-/* ── Product Grid ── */
+/* Product Grid */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
 }
 
-/* ── Product Card ── */
+/* Product Card  */
 .product-card {
   background: var(--ag-card);
   border: 1px solid var(--ag-border);
@@ -261,6 +261,7 @@
   margin-bottom: 12px;
 }
 
+/* ── Image area — taller for real photos ── */
 .product-icon-area {
   display: flex;
   align-items: center;
@@ -268,8 +269,16 @@
   background: var(--ag-surface);
   border: 1px solid var(--ag-border);
   border-radius: 14px;
-  height: 80px;
+  height: 160px;
   margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.product-real-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
 }
 
 .product-big-icon {
@@ -466,16 +475,19 @@
   z-index: 200;
   display: flex;
   justify-content: flex-end;
+  align-items: flex-start;  /* ← align to top */
 }
 
 .cart-drawer {
   width: 380px;
   max-width: 100vw;
+  max-height: 100vh;         /* ← never exceed screen */
   background: var(--ag-surface);
   border-left: 1px solid var(--ag-border);
   display: flex;
   flex-direction: column;
   animation: slide-in 0.25s ease;
+  overflow: hidden;
 }
 
 @keyframes slide-in {
@@ -487,8 +499,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px;
+  padding: 20px 24px;
   border-bottom: 1px solid var(--ag-border);
+  flex-shrink: 0;
 }
 
 .cart-header h2 {
@@ -515,11 +528,12 @@
   color: var(--ag-muted);
   gap: 10px;
   font-size: 14px;
+  padding: 40px 20px;
 }
 
 .cart-items {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto;           /* ← scroll only items if too many */
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -546,6 +560,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .cart-item-info { flex: 1; min-width: 0; }
@@ -606,11 +621,12 @@
 .cart-item-remove:hover { color: var(--ag-red); }
 
 .cart-footer {
-  padding: 20px;
+  padding: 16px 20px 20px;
   border-top: 1px solid var(--ag-border);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex-shrink: 0;             /* ← always visible */
 }
 
 .cart-total {
@@ -619,7 +635,7 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--ag-text);
-  padding-bottom: 8px;
+  padding-bottom: 4px;
 }
 
 .cart-total span:last-child { color: var(--ag-green); }
@@ -658,14 +674,14 @@
   color: var(--ag-red);
 }
 
-/* ── Modal ── */
+/* ── Modal — centered in viewport ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.7);
   z-index: 300;
   display: flex;
-  align-items: center;
+  align-items: center;        /* ← always centered vertically */
   justify-content: center;
   padding: 20px;
 }
@@ -676,16 +692,20 @@
   border-radius: 20px;
   width: 100%;
   max-width: 520px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 85vh;           /* ← limit height to viewport */
+  overflow-y: auto;           /* ← scroll inside modal */
   animation: modal-in 0.2s ease;
+  margin: auto;
 }
 
-.modal--sm { max-width: 360px; padding: 28px; }
+.modal--sm {
+  max-width: 360px;
+  padding: 28px;
+}
 
 @keyframes modal-in {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.96) translateY(-10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
 
 .modal-header {
@@ -758,7 +778,6 @@
 .modal-field input:focus,
 .modal-field select:focus,
 .modal-field textarea:focus { border-color: var(--ag-green-dark); }
-
 .modal-field select option { background: var(--ag-surface); }
 
 .modal-actions {
@@ -826,12 +845,27 @@
   margin: 0 24px 4px;
 }
 
+/* ── Image upload area ── */
+.image-upload-area {
+  border: 2px dashed rgba(74, 222, 128, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  min-height: 100px;
+}
+
+.image-upload-area:hover {
+  border-color: rgba(74, 222, 128, 0.6);
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .products-page { padding: 20px 16px; }
   .products-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .modal-row-2 { grid-template-columns: 1fr; }
   .cart-drawer { width: 100vw; }
+  .modal-overlay { padding: 16px; }
 }
 
 @media (max-width: 420px) {
