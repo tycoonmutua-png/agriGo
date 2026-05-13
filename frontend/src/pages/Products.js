@@ -2,6 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import API from "../services/api";
 import "./Products.css";
 
+// ── Your Cloudinary credentials ───────────────────────────────────
+const CLOUDINARY_CLOUD_NAME = "dd1p7kcvz";
+const CLOUDINARY_UPLOAD_PRESET = "agrigo_products"; // create this unsigned preset in Cloudinary
+
 function getUserRole() {
   const token = sessionStorage.getItem("token");
   if (!token) return "user";
@@ -25,18 +29,17 @@ const getStockStatus = (stock) => {
   return { label: "In Stock", cls: "stock-ok" };
 };
 
-// Build full image URL
 const getImageUrl = (image) => {
   if (!image) return null;
-  if (image.startsWith("http")) return image; // external URL
-  return `http://localhost:5000${image}`;      // local upload
+  if (image.startsWith("http")) return image;
+  return `https://agrigo-backend-ibus.onrender.com${image}`;
 };
 
 export default function Products() {
-  const role               = getUserRole();
-  const isAdmin            = role === "admin";
-  const isStockSupervisor  = role === "stock_supervisor";
-  const canManage          = isAdmin || isStockSupervisor;
+  const role              = getUserRole();
+  const isAdmin           = role === "admin";
+  const isStockSupervisor = role === "stock_supervisor";
+  const canManage         = isAdmin || isStockSupervisor;
 
   const [products, setProducts]             = useState([]);
   const [loading, setLoading]               = useState(true);
@@ -53,8 +56,6 @@ export default function Products() {
   const [formError, setFormError]           = useState("");
   const [deleteConfirm, setDeleteConfirm]   = useState(null);
 
-  // Image upload
-  const [imageFile, setImageFile]           = useState(null);
   const [imagePreview, setImagePreview]     = useState("");
   const [uploading, setUploading]           = useState(false);
   const fileInputRef                        = useRef(null);
@@ -65,7 +66,7 @@ export default function Products() {
       const res = await API.get("/products");
       setProducts(res.data);
     } catch {
-      setError("Failed to load products. Is the backend running?");
+      setError("Failed to load products.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +80,7 @@ export default function Products() {
     return matchSearch && matchCat;
   });
 
-  // ── Cart ──
+  // ── Cart ──────────────────────────────────────────────────────
   const addToCart = (product) => {
     setCart(prev => {
       const existing = prev.find(i => i._id === product._id);
@@ -95,19 +96,51 @@ export default function Products() {
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
-  // ── Image selection ──
-  const handleImageSelect = (e) => {
+  // ── Upload image to Cloudinary ────────────────────────────────
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setImageFile(file);
+
+    // Show local preview immediately
     setImagePreview(URL.createObjectURL(file));
+    setUploading(true);
+    setFormError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+      formData.append("folder", "agrigo/products");
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
+      const data = await res.json();
+
+      if (data.secure_url) {
+        setForm(f => ({ ...f, image: data.secure_url }));
+        setImagePreview(data.secure_url);
+      } else {
+        setFormError("Image upload failed. Try again.");
+      }
+    } catch {
+      setFormError("Image upload failed. Check your connection.");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  // ── Admin modal ──
+  const clearImage = () => {
+    setForm(f => ({ ...f, image: "" }));
+    setImagePreview("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // ── Modal ─────────────────────────────────────────────────────
   const openAdd = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
-    setImageFile(null);
     setImagePreview("");
     setFormError("");
     setShowModal(true);
@@ -124,7 +157,6 @@ export default function Products() {
       unit:        product.unit || "kg",
       image:       product.image || "",
     });
-    setImageFile(null);
     setImagePreview(product.image ? getImageUrl(product.image) : "");
     setFormError("");
     setShowModal(true);
@@ -132,35 +164,19 @@ export default function Products() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (uploading) return setFormError("Please wait for image to finish uploading.");
     setFormError("");
     setSaving(true);
     try {
-      let imageUrl = form.image;
-
-      // Upload new image if selected
-      if (imageFile) {
-        setUploading(true);
-        const formData = new FormData();
-        formData.append("image", imageFile);
-        const uploadRes = await API.post("/products/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        imageUrl = uploadRes.data.imageUrl;
-        setUploading(false);
-      }
-
-      const productData = { ...form, image: imageUrl };
-
       if (editingId) {
-        await API.put(`/products/${editingId}`, productData);
+        await API.put(`/products/${editingId}`, form);
       } else {
-        await API.post("/products", productData);
+        await API.post("/products", form);
       }
       setShowModal(false);
       fetchProducts();
     } catch (err) {
       setFormError(err.response?.data?.message || "Failed to save product.");
-      setUploading(false);
     } finally {
       setSaving(false);
     }
@@ -257,18 +273,13 @@ export default function Products() {
                   {getCategoryEmoji(product.category)} {product.category || "General"}
                 </div>
 
-                {/* IMAGE */}
                 <div className="product-icon-area">
                   {imgUrl ? (
-                    <img
-                      src={imgUrl}
-                      alt={product.name}
-                      className="product-real-img"
+                    <img src={imgUrl} alt={product.name} className="product-real-img"
                       onError={e => {
                         e.target.style.display = "none";
                         e.target.nextSibling.style.display = "flex";
-                      }}
-                    />
+                      }} />
                   ) : null}
                   <span className="product-big-icon"
                     style={{ display: imgUrl ? "none" : "flex" }}>
@@ -295,7 +306,6 @@ export default function Products() {
                   <p className="product-stock-text">{product.stock} units remaining</p>
                 </div>
 
-                {/* ACTIONS */}
                 <div className="product-actions">
                   {canManage ? (
                     <>
@@ -392,34 +402,74 @@ export default function Products() {
               <h2>{editingId ? "✏️ Edit Product" : "➕ Add Product"}</h2>
               <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
             </div>
+
             {formError && <div className="auth-error">{formError}</div>}
+
             <form onSubmit={handleSave} className="modal-form">
 
-              {/* IMAGE UPLOAD */}
+              {/* ── IMAGE UPLOAD ── */}
               <div className="modal-field">
                 <label>Product Image</label>
-                <div className="image-upload-area" onClick={() => fileInputRef.current.click()}>
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="preview"
-                      style={{ width: "100%", height: "160px", objectFit: "cover", borderRadius: "8px" }} />
-                  ) : (
-                    <div style={{ textAlign: "center", padding: "32px", opacity: 0.5 }}>
-                      <div style={{ fontSize: "32px" }}>📸</div>
-                      <p style={{ margin: "8px 0 0", fontSize: "0.85rem" }}>Click to upload image</p>
-                      <p style={{ margin: "4px 0 0", fontSize: "0.75rem" }}>JPG, PNG, WEBP up to 5MB</p>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleImageUpload}
+                />
+
+                {imagePreview ? (
+                  /* Show preview with change/remove buttons */
+                  <div className="img-preview-wrap">
+                    <img
+                      src={imagePreview}
+                      alt="preview"
+                      className="img-preview"
+                      onError={e => { e.target.style.display = "none"; }}
+                    />
+                    {uploading && (
+                      <div className="img-uploading-overlay">
+                        <div className="state-spinner" />
+                        <span>Uploading…</span>
+                      </div>
+                    )}
+                    <div className="img-preview-actions">
+                      <button
+                        type="button"
+                        className="btn-change-img"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        🔄 Change
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-remove-img"
+                        onClick={clearImage}
+                        disabled={uploading}
+                      >
+                        🗑️ Remove
+                      </button>
                     </div>
-                  )}
-                  <input ref={fileInputRef} type="file" accept="image/*"
-                    style={{ display: "none" }} onChange={handleImageSelect} />
-                </div>
-                {imagePreview && (
-                  <button type="button" style={{ marginTop: "6px", fontSize: "0.8rem", opacity: 0.6, background: "none", border: "none", color: "#ff4d4d", cursor: "pointer" }}
-                    onClick={() => { setImageFile(null); setImagePreview(""); setForm({ ...form, image: "" }); }}>
-                    ✕ Remove image
-                  </button>
+                  </div>
+                ) : (
+                  /* Upload drop zone */
+                  <div
+                    className="img-upload-zone"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <span style={{ fontSize: 36 }}>📷</span>
+                    <p>Click to upload image</p>
+                    <p style={{ fontSize: "0.75rem", opacity: 0.5 }}>
+                      JPG, PNG, WEBP — uploads to Cloudinary
+                    </p>
+                  </div>
                 )}
               </div>
 
+              {/* NAME + CATEGORY */}
               <div className="modal-row-2">
                 <div className="modal-field">
                   <label>Product Name *</label>
@@ -428,12 +478,14 @@ export default function Products() {
                 </div>
                 <div className="modal-field">
                   <label>Category *</label>
-                  <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                  <select value={form.category}
+                    onChange={e => setForm({ ...form, category: e.target.value })}>
                     {CATEGORIES.filter(c => c !== "All").map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
               </div>
 
+              {/* PRICE + STOCK */}
               <div className="modal-row-2">
                 <div className="modal-field">
                   <label>Price (KES) *</label>
@@ -447,23 +499,31 @@ export default function Products() {
                 </div>
               </div>
 
+              {/* UNIT */}
               <div className="modal-field">
                 <label>Unit</label>
-                <select value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })}>
-                  {["kg","g","litre","piece","bag","box","crate","unit"].map(u => <option key={u}>{u}</option>)}
+                <select value={form.unit}
+                  onChange={e => setForm({ ...form, unit: e.target.value })}>
+                  {["kg","g","litre","piece","bag","box","crate","unit"].map(u =>
+                    <option key={u}>{u}</option>
+                  )}
                 </select>
               </div>
 
+              {/* DESCRIPTION */}
               <div className="modal-field">
                 <label>Description</label>
                 <textarea placeholder="Brief product description..." rows={3}
-                  value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })} />
               </div>
 
               <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="btn-save" disabled={saving || uploading}>
-                  {uploading ? "Uploading image..." : saving ? "Saving..." : editingId ? "Save Changes" : "Add Product"}
+                <button type="button" className="btn-cancel"
+                  onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" className="btn-save"
+                  disabled={saving || uploading}>
+                  {uploading ? "Uploading image…" : saving ? "Saving…" : editingId ? "Save Changes" : "Add Product"}
                 </button>
               </div>
             </form>
@@ -479,12 +539,12 @@ export default function Products() {
             <p style={{ color: "#6b9470", marginBottom: "24px" }}>This action cannot be undone.</p>
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>Cancel</button>
-              <button className="btn-delete-confirm" onClick={() => handleDelete(deleteConfirm)}>Yes, Delete</button>
+              <button className="btn-delete-confirm"
+                onClick={() => handleDelete(deleteConfirm)}>Yes, Delete</button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
