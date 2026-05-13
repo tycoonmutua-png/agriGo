@@ -35,10 +35,11 @@
 /* ── Layout Shell ── */
 .layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--ag-bg);
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
   color: var(--ag-text);
+  overflow: hidden;
 }
 
 /* ── Sidebar ── */
@@ -72,12 +73,11 @@
   white-space: nowrap;
 }
 
-/* ── Sidebar logo image — BIGGER & VISIBLE ── */
 .sidebar-logo-img {
-  width: 44px;          /* ← bigger than before (was 36px) */
+  width: 44px;
   height: 44px;
   border-radius: 10px;
-  object-fit: contain;  /* show full logo */
+  object-fit: contain;
   flex-shrink: 0;
   background: #0c1a0d;
   padding: 3px;
@@ -220,7 +220,8 @@
   flex: 1;
   margin-left: var(--sidebar-w);
   transition: margin-left 0.35s var(--ease-out-expo);
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
