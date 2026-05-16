@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import API from "../services/api";
 import "./Products.css";
 
-// ── Your Cloudinary credentials ───────────────────────────────────
-const CLOUDINARY_CLOUD_NAME = "dd1p7kcvz";
-const CLOUDINARY_UPLOAD_PRESET = "agrigo_products"; // create this unsigned preset in Cloudinary
+// ── Cloudinary credentials ─────────────────────────────────────────
+const CLOUDINARY_CLOUD_NAME    = "dd1p7kcvz";
+const CLOUDINARY_UPLOAD_PRESET = "agrigo_products";
 
 function getUserRole() {
   const token = sessionStorage.getItem("token");
@@ -41,25 +41,33 @@ export default function Products() {
   const isStockSupervisor = role === "stock_supervisor";
   const canManage         = isAdmin || isStockSupervisor;
 
-  const [products, setProducts]             = useState([]);
-  const [loading, setLoading]               = useState(true);
-  const [error, setError]                   = useState("");
-  const [search, setSearch]                 = useState("");
+  const [products, setProducts]           = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState("");
+  const [search, setSearch]               = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [cart, setCart]                     = useState([]);
-  const [showCart, setShowCart]             = useState(false);
+  const [cart, setCart]                   = useState([]);
+  const [showCart, setShowCart]           = useState(false);
 
-  const [showModal, setShowModal]           = useState(false);
-  const [editingId, setEditingId]           = useState(null);
-  const [form, setForm]                     = useState(EMPTY_FORM);
-  const [saving, setSaving]                 = useState(false);
-  const [formError, setFormError]           = useState("");
-  const [deleteConfirm, setDeleteConfirm]   = useState(null);
+  const [showModal, setShowModal]         = useState(false);
+  const [editingId, setEditingId]         = useState(null);
+  const [form, setForm]                   = useState(EMPTY_FORM);
+  const [saving, setSaving]               = useState(false);
+  const [formError, setFormError]         = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const [imagePreview, setImagePreview]     = useState("");
-  const [uploading, setUploading]           = useState(false);
-  const fileInputRef                        = useRef(null);
+  const [imagePreview, setImagePreview]   = useState("");
+  const [uploading, setUploading]         = useState(false);
+  const fileInputRef                      = useRef(null);
 
+  // ── Smart modal positioning ───────────────────────────────────────
+  // modalAnchorY: absolute page Y where the modal top should appear
+  // newProductId: _id of newly added product so we scroll to it after save
+  const [modalAnchorY, setModalAnchorY]   = useState(null);
+  const [newProductId, setNewProductId]   = useState(null);
+  const cardRefs                          = useRef({});   // { [_id]: DOM el }
+
+  // ─────────────────────────────────────────────────────────────────
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -74,13 +82,26 @@ export default function Products() {
 
   useEffect(() => { fetchProducts(); }, []);
 
+  // After adding a product, scroll its card into view & flash it
+  useEffect(() => {
+    if (!newProductId) return;
+    const el = cardRefs.current[newProductId];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("product-card--highlight");
+      setTimeout(() => el.classList.remove("product-card--highlight"), 1800);
+    }
+    setNewProductId(null);
+  }, [products, newProductId]);
+
+  // ─────────────────────────────────────────────────────────────────
   const filtered = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchCat    = activeCategory === "All" || p.category === activeCategory;
     return matchSearch && matchCat;
   });
 
-  // ── Cart ──────────────────────────────────────────────────────
+  // ── Cart ──────────────────────────────────────────────────────────
   const addToCart = (product) => {
     setCart(prev => {
       const existing = prev.find(i => i._id === product._id);
@@ -96,28 +117,23 @@ export default function Products() {
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
-  // ── Upload image to Cloudinary ────────────────────────────────
+  // ── Image upload ──────────────────────────────────────────────────
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // Show local preview immediately
     setImagePreview(URL.createObjectURL(file));
     setUploading(true);
     setFormError("");
-
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-      formData.append("folder", "agrigo/products");
-
-      const res = await fetch(
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+      fd.append("folder", "agrigo/products");
+      const res  = await fetch(
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: formData }
+        { method: "POST", body: fd }
       );
       const data = await res.json();
-
       if (data.secure_url) {
         setForm(f => ({ ...f, image: data.secure_url }));
         setImagePreview(data.secure_url);
@@ -137,16 +153,20 @@ export default function Products() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // ── Modal ─────────────────────────────────────────────────────
+  // ── Open ADD — modal appears at top of content area ───────────────
   const openAdd = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
     setImagePreview("");
     setFormError("");
+    // Snap page to top first, then anchor modal just below the fixed bars
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setModalAnchorY(180);   // below header(68) + toolbar(~107) + small gap
     setShowModal(true);
   };
 
-  const openEdit = (product) => {
+  // ── Open EDIT — modal anchored near the clicked card ─────────────
+  const openEdit = (product, cardEl) => {
     setEditingId(product._id);
     setForm({
       name:        product.name,
@@ -159,9 +179,22 @@ export default function Products() {
     });
     setImagePreview(product.image ? getImageUrl(product.image) : "");
     setFormError("");
+
+    if (cardEl) {
+      const rect  = cardEl.getBoundingClientRect();
+      // absolute Y on the page (accounts for current scroll)
+      const pageY = rect.top + window.scrollY;
+      // Place modal 20px above the card; clamp so it never hides behind the fixed bars
+      const anchorY = Math.max(180, pageY - 20);
+      setModalAnchorY(anchorY);
+    } else {
+      setModalAnchorY(window.scrollY + 100);
+    }
+
     setShowModal(true);
   };
 
+  // ── Save ──────────────────────────────────────────────────────────
   const handleSave = async (e) => {
     e.preventDefault();
     if (uploading) return setFormError("Please wait for image to finish uploading.");
@@ -170,11 +203,15 @@ export default function Products() {
     try {
       if (editingId) {
         await API.put(`/products/${editingId}`, form);
+        setShowModal(false);
+        fetchProducts();
       } else {
-        await API.post("/products", form);
+        const res     = await API.post("/products", form);
+        const created = res.data;           // expects { _id, ... }
+        setShowModal(false);
+        await fetchProducts();              // re-fetch full list
+        if (created?._id) setNewProductId(created._id);   // triggers scroll+flash
       }
-      setShowModal(false);
-      fetchProducts();
     } catch (err) {
       setFormError(err.response?.data?.message || "Failed to save product.");
     } finally {
@@ -192,10 +229,17 @@ export default function Products() {
     }
   };
 
+  // ── Build inline style for anchored modal ─────────────────────────
+  // The overlay is position:fixed, but the modal inside it is
+  // position:absolute so we can place it anywhere on the page.
+  const modalStyle = modalAnchorY !== null
+    ? { position: "absolute", top: `${modalAnchorY}px`, left: "50%", transform: "translateX(-50%)" }
+    : {};
+
   return (
     <div className="products-page">
 
-      {/* HEADER */}
+      {/* ── HEADER (fixed) ── */}
       <div className="products-header">
         <div>
           <h1 className="products-title">
@@ -220,24 +264,32 @@ export default function Products() {
         </div>
       </div>
 
-      {/* SEARCH + FILTER */}
+      {/* ── SEARCH + FILTER (fixed below header) ── */}
       <div className="products-toolbar">
         <div className="search-wrap">
           <span className="search-icon">🔍</span>
-          <input className="search-input" type="text" placeholder="Search products..."
-            value={search} onChange={e => setSearch(e.target.value)} />
+          <input
+            className="search-input"
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
         <div className="category-tabs">
           {CATEGORIES.map(cat => (
-            <button key={cat}
+            <button
+              key={cat}
               className={`cat-tab ${activeCategory === cat ? "cat-tab--active" : ""}`}
-              onClick={() => setActiveCategory(cat)}>
+              onClick={() => setActiveCategory(cat)}
+            >
               {getCategoryEmoji(cat)} {cat}
             </button>
           ))}
         </div>
       </div>
 
+      {/* ── BODY ── */}
       {loading && (
         <div className="products-state">
           <div className="state-spinner" />
@@ -266,9 +318,12 @@ export default function Products() {
             const imgUrl   = getImageUrl(product.image);
 
             return (
-              <div className="product-card" key={product._id}
-                style={{ animationDelay: `${i * 0.05}s` }}>
-
+              <div
+                className="product-card"
+                key={product._id}
+                style={{ animationDelay: `${i * 0.05}s` }}
+                ref={el => { cardRefs.current[product._id] = el; }}
+              >
                 <div className="product-cat-badge">
                   {getCategoryEmoji(product.category)} {product.category || "General"}
                 </div>
@@ -309,8 +364,18 @@ export default function Products() {
                 <div className="product-actions">
                   {canManage ? (
                     <>
-                      <button className="btn-edit" onClick={() => openEdit(product)}>✏️ Edit</button>
-                      <button className="btn-delete" onClick={() => setDeleteConfirm(product._id)}>🗑️ Delete</button>
+                      <button
+                        className="btn-edit"
+                        onClick={() => openEdit(product, cardRefs.current[product._id])}
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => setDeleteConfirm(product._id)}
+                      >
+                        🗑️ Delete
+                      </button>
                     </>
                   ) : (
                     <>
@@ -321,9 +386,11 @@ export default function Products() {
                           <button onClick={() => updateQty(product._id, cartItem.qty + 1)}>+</button>
                         </div>
                       ) : (
-                        <button className="btn-add-cart"
+                        <button
+                          className="btn-add-cart"
                           disabled={product.stock === 0}
-                          onClick={() => addToCart(product)}>
+                          onClick={() => addToCart(product)}
+                        >
                           {product.stock === 0 ? "Out of Stock" : "🛒 Add to Cart"}
                         </button>
                       )}
@@ -336,7 +403,7 @@ export default function Products() {
         </div>
       )}
 
-      {/* CART SIDEBAR */}
+      {/* ── CART SIDEBAR ── */}
       {showCart && (
         <div className="cart-overlay" onClick={() => setShowCart(false)}>
           <div className="cart-drawer" onClick={e => e.stopPropagation()}>
@@ -394,10 +461,14 @@ export default function Products() {
         </div>
       )}
 
-      {/* ADD / EDIT MODAL */}
+      {/* ── ADD / EDIT MODAL — anchored near the triggering card ── */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay modal-overlay--anchored" onClick={() => setShowModal(false)}>
+          <div
+            className="modal"
+            style={modalStyle}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>{editingId ? "✏️ Edit Product" : "➕ Add Product"}</h2>
               <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
@@ -407,28 +478,15 @@ export default function Products() {
 
             <form onSubmit={handleSave} className="modal-form">
 
-              {/* ── IMAGE UPLOAD ── */}
+              {/* IMAGE */}
               <div className="modal-field">
                 <label>Product Image</label>
-
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleImageUpload}
-                />
-
+                <input ref={fileInputRef} type="file" accept="image/*"
+                  style={{ display: "none" }} onChange={handleImageUpload} />
                 {imagePreview ? (
-                  /* Show preview with change/remove buttons */
                   <div className="img-preview-wrap">
-                    <img
-                      src={imagePreview}
-                      alt="preview"
-                      className="img-preview"
-                      onError={e => { e.target.style.display = "none"; }}
-                    />
+                    <img src={imagePreview} alt="preview" className="img-preview"
+                      onError={e => { e.target.style.display = "none"; }} />
                     {uploading && (
                       <div className="img-uploading-overlay">
                         <div className="state-spinner" />
@@ -436,35 +494,21 @@ export default function Products() {
                       </div>
                     )}
                     <div className="img-preview-actions">
-                      <button
-                        type="button"
-                        className="btn-change-img"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                      >
+                      <button type="button" className="btn-change-img"
+                        onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                         🔄 Change
                       </button>
-                      <button
-                        type="button"
-                        className="btn-remove-img"
-                        onClick={clearImage}
-                        disabled={uploading}
-                      >
+                      <button type="button" className="btn-remove-img"
+                        onClick={clearImage} disabled={uploading}>
                         🗑️ Remove
                       </button>
                     </div>
                   </div>
                 ) : (
-                  /* Upload drop zone */
-                  <div
-                    className="img-upload-zone"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
+                  <div className="img-upload-zone" onClick={() => fileInputRef.current?.click()}>
                     <span style={{ fontSize: 36 }}>📷</span>
                     <p>Click to upload image</p>
-                    <p style={{ fontSize: "0.75rem", opacity: 0.5 }}>
-                      JPG, PNG, WEBP — uploads to Cloudinary
-                    </p>
+                    <p style={{ fontSize: "0.75rem", opacity: 0.5 }}>JPG, PNG, WEBP — uploads to Cloudinary</p>
                   </div>
                 )}
               </div>
@@ -521,8 +565,7 @@ export default function Products() {
               <div className="modal-actions">
                 <button type="button" className="btn-cancel"
                   onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="btn-save"
-                  disabled={saving || uploading}>
+                <button type="submit" className="btn-save" disabled={saving || uploading}>
                   {uploading ? "Uploading image…" : saving ? "Saving…" : editingId ? "Save Changes" : "Add Product"}
                 </button>
               </div>
@@ -531,7 +574,7 @@ export default function Products() {
         </div>
       )}
 
-      {/* DELETE CONFIRM */}
+      {/* ── DELETE CONFIRM ── */}
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
           <div className="modal modal--sm" onClick={e => e.stopPropagation()}>
