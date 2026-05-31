@@ -21,7 +21,7 @@ export default function MyReceipts() {
   const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
-    API.get("/orders/my-orders")
+    API.get("/api/orders/my-orders")
       .then(({ data }) => setOrders(Array.isArray(data) ? data : []))
       .catch(() => setError("Could not load your orders. Please try again."))
       .finally(() => setLoading(false));

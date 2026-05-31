@@ -57,7 +57,7 @@ export default function CustomerRegister() {
     setError("");
     setLoading(true);
     try {
-      const { data } = await API.post("/auth/register", {  // ✅ FIXED: was /auth/register/customer
+      const { data } = await API.post("/api/auth/register", { // 
         firstName,
         lastName,
         email,
@@ -106,7 +106,7 @@ export default function CustomerRegister() {
       (response) => {
         if (response.authResponse) {
           setFbLoading(true);
-          API.post("/auth/facebook", {
+          API.post("/api/auth/facebook", {
             access_token: response.authResponse.accessToken,
             userID:       response.authResponse.userID,
           }).then(({ data }) => {

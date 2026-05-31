@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://agrigo-backend-ibus.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || "https://agrigo-backend-ibus.onrender.com",
   timeout: 20000, // 20 seconds max wait
 });
 

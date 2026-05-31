@@ -25,8 +25,8 @@ export default function Sales() {
 
   useEffect(() => {
     Promise.all([
-      API.get("/orders").catch(() => ({ data: [] })),
-      API.get("/products").catch(() => ({ data: [] })),
+      API.get("/api/orders").catch(() => ({ data: [] })),
+      API.get("/api/products").catch(() => ({ data: [] })),
     ]).then(([o, p]) => {
       setOrders(Array.isArray(o.data) ? o.data : []);
       setProducts(Array.isArray(p.data) ? p.data : []);

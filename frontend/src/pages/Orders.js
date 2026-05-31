@@ -55,7 +55,7 @@ export default function Orders() {
   const isCustomer  = CUSTOMER_ROLES.includes(role);
 
   useEffect(() => {
-    API.get("/orders")
+    API.get("/api/orders")
       .then(r => {
         let data = Array.isArray(r.data) ? r.data : [];
         if (isCustomer) {

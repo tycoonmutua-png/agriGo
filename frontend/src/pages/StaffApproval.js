@@ -44,7 +44,7 @@ export default function StaffApproval() {
   const fetchStaff = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await API.get("/users/staff");
+      const { data } = await API.get("/api/users/staff");
       setStaff(Array.isArray(data) ? data : []);
     } catch {
       showToast("Failed to load staff list.", "error");
@@ -86,7 +86,7 @@ export default function StaffApproval() {
     setAddError("");
     setAddLoading(true);
     try {
-      await API.post("/auth/register-staff", addForm);
+      await API.post("/api/auth/register-staff", addForm);
       setShowAddModal(false);
       setAddForm({ name: "", email: "", phone: "", role: "cashier", password: "" });
       showToast("✅ Staff account created successfully!");

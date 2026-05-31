@@ -45,7 +45,7 @@ export default function SettingsAndProfile() {
 
   // Fetch user from API on mount
   useEffect(() => {
-    API.get("/users/me")
+    API.get("/api/users/me")
       .then(({ data }) => {
         setName(data.name   || "");
         setEmail(data.email || "");

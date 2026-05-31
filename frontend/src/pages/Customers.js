@@ -29,8 +29,8 @@ export default function Customers() {
   const fetchData = () => {
     setLoading(true);
     Promise.all([
-      API.get("/users").catch(() => ({ data: [] })),
-      API.get("/orders").catch(() => ({ data: [] })),
+      API.get("/api/users").catch(() => ({ data: [] })),
+      API.get("/api/orders").catch(() => ({ data: [] })),
     ]).then(([u, o]) => {
       setCustomers(Array.isArray(u.data) ? u.data : []);
       setOrders(Array.isArray(o.data) ? o.data : []);

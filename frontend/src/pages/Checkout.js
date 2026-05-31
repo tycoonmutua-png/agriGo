@@ -90,7 +90,7 @@ export default function Checkout() {
         },
         total: cartTotal,
       };
-      const res = await API.post("/orders", orderData);
+      const res = await API.post("/api/orders", orderData);
       setOrderId(res.data._id);
       sessionStorage.removeItem("cart");
       nextStep();
@@ -107,7 +107,7 @@ export default function Checkout() {
     setError("");
     setLoading(true);
     try {
-      const res = await API.post("/payments/stk-push", {
+      const res = await API.post("/api/payments/stk-push", {
         phone: mpesaPhone,
         amount: cartTotal,
         orderId,
@@ -130,7 +130,7 @@ export default function Checkout() {
     setError("");
     setLoading(true);
     try {
-      await API.post("/payments/query", { checkoutRequestID, orderId });
+      await API.post("/api/payments/query", { checkoutRequestID, orderId });
       setPaymentDone(true);
     } catch (err) {
       setError(err.response?.data?.message || "Payment not confirmed. Please enter your PIN and try again.");

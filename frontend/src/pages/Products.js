@@ -71,7 +71,7 @@ export default function Products() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await API.get("/products");
+      const res = await API.get("/api/products");
       setProducts(res.data);
     } catch {
       setError("Failed to load products.");
@@ -206,7 +206,7 @@ export default function Products() {
         setShowModal(false);
         fetchProducts();
       } else {
-        const res     = await API.post("/products", form);
+        const res     = await API.post("/api/products", form);
         const created = res.data;           // expects { _id, ... }
         setShowModal(false);
         await fetchProducts();              // re-fetch full list

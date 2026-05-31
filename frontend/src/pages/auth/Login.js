@@ -45,7 +45,7 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const res = await API.post("/auth/login", { email, password });
+      const res = await API.post("/api/auth/login", { email, password });
       sessionStorage.setItem("token", res.data.token);
       redirectByRole(res.data.role);
     } catch (err) {
@@ -65,7 +65,7 @@ export default function Login() {
       setGoogleLoading(true);
       setError("");
       try {
-        const { data } = await API.post("/auth/google", {
+        const { data } = await API.post("/api/auth/google", {
           access_token: tokenResponse.access_token,
         });
         sessionStorage.setItem("token", data.token);
@@ -90,7 +90,7 @@ export default function Login() {
       (response) => {
         if (response.authResponse) {
           setFbLoading(true);
-          API.post("/auth/facebook", {
+          API.post("/api/auth/facebook", {
             access_token: response.authResponse.accessToken,
             userID:       response.authResponse.userID,
           }).then(({ data }) => {

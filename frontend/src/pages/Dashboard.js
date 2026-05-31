@@ -16,8 +16,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      API.get("/products").catch(() => ({ data: [] })),
-      API.get("/orders").catch(() => ({ data: [] })),
+      API.get("/api/products").catch(() => ({ data: [] })),
+      API.get("/api/orders").catch(() => ({ data: [] })),
     ]).then(([p, o]) => {
       setProducts(Array.isArray(p.data) ? p.data : []);
       setOrders(Array.isArray(o.data) ? o.data : []);
