@@ -39,7 +39,6 @@ export default function Login() {
     }
   };
 
-  // ── Email / password login ───────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -59,7 +58,6 @@ export default function Login() {
     }
   };
 
-  // ── Google login ─────────────────────────────────────────────
   const handleGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
@@ -79,7 +77,6 @@ export default function Login() {
     onError: () => setError("Google login was cancelled or failed."),
   });
 
-  // ── Facebook login ───────────────────────────────────────────
   const handleFacebook = () => {
     setError("");
     if (!window.FB) {
@@ -108,12 +105,12 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-bg-leaf auth-bg-leaf--1" aria-hidden="true" />
-      <div className="auth-bg-leaf auth-bg-leaf--2" aria-hidden="true" />
-      <div className="auth-bg-circle" aria-hidden="true" />
+    <div className="auth-page auth-page--bg">
+      {/* Full background — aerial green tractor field */}
+      <div className="auth-full-bg" />
+      <div className="auth-full-overlay" />
 
-      <div className="auth-card">
+      <div className="auth-card auth-card--glass">
         {/* Logo */}
         <div className="auth-logo-wrap">
           <img src="/logo.png" alt="AgriGo" className="auth-logo-img" />
@@ -128,7 +125,7 @@ export default function Login() {
 
         {error && <div className="auth-error">{error}</div>}
 
-        {/* ── Social buttons ── */}
+        {/* Social buttons */}
         <div className="auth-social-row" style={{ marginBottom: 16 }}>
           <button className="auth-social-btn" type="button"
             onClick={() => handleGoogle()} disabled={googleLoading || fbLoading || loading}>
@@ -165,12 +162,16 @@ export default function Login() {
           <span className="auth-divider-line" />
         </div>
 
-        {/* Email / password form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <div className="auth-field">
             <label className="auth-label" htmlFor="email">Email</label>
             <div className="auth-input-wrap">
-              <span className="auth-input-icon">✉</span>
+              <span className="auth-input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+              </span>
               <input id="email" type="email" className="auth-input"
                 placeholder="farmer@example.com" value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -181,14 +182,29 @@ export default function Login() {
           <div className="auth-field">
             <label className="auth-label" htmlFor="password">Password</label>
             <div className="auth-input-wrap">
-              <span className="auth-input-icon">🔒</span>
+              <span className="auth-input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </span>
               <input id="password" type={showPassword ? "text" : "password"}
                 className="auth-input" placeholder="••••••••" value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required autoComplete="current-password" />
               <button type="button" className="auth-eye-btn"
-                onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? "🙈" : "👁"}
+                onClick={() => setShowPassword(!showPassword)} aria-label="Toggle password">
+                {showPassword ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
               </button>
             </div>
           </div>

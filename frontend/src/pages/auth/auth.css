@@ -561,3 +561,52 @@
 .auth-eye-btn:hover {
   opacity: 1;
 }
+/* ================================================
+   ADD THESE AT THE VERY BOTTOM OF auth.css
+   ================================================ */
+
+/* ── Full background for login page ── */
+.auth-page--bg {
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-full-bg {
+  position: fixed;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&q=80');
+  background-size: cover;
+  background-position: center top;
+  z-index: 0;
+}
+
+.auth-full-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 20, 5, 0.55) 0%,
+    rgba(5, 20, 5, 0.45) 40%,
+    rgba(5, 20, 5, 0.75) 100%
+  );
+  z-index: 1;
+}
+
+/* ── Glassmorphism card for login ── */
+.auth-card--glass {
+  background: rgba(11, 28, 12, 0.75) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(74, 222, 128, 0.2) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  margin: 24px 16px;
+}
+
+.auth-card--glass .auth-input {
+  background: rgba(19, 41, 20, 0.8);
+}
+
+.auth-card--glass .auth-social-btn {
+  background: rgba(19, 41, 20, 0.7);
+}

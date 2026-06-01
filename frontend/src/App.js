@@ -3,6 +3,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import DashboardLayout      from "./layouts/DashboardLayout";
 import CustomerLayout       from "./layouts/CustomerLayout";
 import ProtectedRoute       from "./components/ProtectedRoute";
+import LandingPage          from "./pages/LandingPage";
 import Login                from "./pages/auth/Login";
 import Register             from "./pages/auth/Register";
 import CustomerRegister     from "./pages/auth/CustomerRegister";
@@ -39,6 +40,9 @@ export default function App() {
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <Routes>
+          {/* ── Landing page ── */}
+          <Route path="/" element={<LandingPage />} />
+
           {/* ── Public auth routes ── */}
           <Route path="/login"             element={<Login />} />
           <Route path="/register"          element={<Register />} />
@@ -75,7 +79,7 @@ export default function App() {
           </Route>
 
           {/* ── Fallback ── */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </GoogleOAuthProvider>

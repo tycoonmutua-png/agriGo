@@ -1,0 +1,341 @@
+/* ================================================
+   AgriGo — Landing / Splash Page (LandingPage.css)
+   ================================================ */
+
+.landing-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── Background image (farm collage) ── */
+.landing-bg {
+  position: fixed;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.05);
+  transition: transform 1.2s ease;
+  z-index: 0;
+}
+
+.landing-loaded .landing-bg {
+  transform: scale(1);
+}
+
+/* ── Dark gradient overlay ── */
+.landing-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 20, 5, 0.45) 0%,
+    rgba(5, 20, 5, 0.3) 30%,
+    rgba(5, 20, 5, 0.55) 65%,
+    rgba(5, 20, 5, 0.88) 100%
+  );
+  z-index: 1;
+}
+
+/* ── Floating particles ── */
+.landing-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.15);
+  animation: particle-float linear infinite;
+}
+
+.particle--1 { width: 6px; height: 6px; left: 15%; top: 20%; animation-duration: 8s; animation-delay: 0s; }
+.particle--2 { width: 4px; height: 4px; left: 75%; top: 15%; animation-duration: 11s; animation-delay: 2s; }
+.particle--3 { width: 8px; height: 8px; left: 55%; top: 70%; animation-duration: 9s; animation-delay: 1s; }
+.particle--4 { width: 5px; height: 5px; left: 85%; top: 45%; animation-duration: 13s; animation-delay: 3s; }
+.particle--5 { width: 7px; height: 7px; left: 25%; top: 80%; animation-duration: 10s; animation-delay: 0.5s; }
+.particle--6 { width: 4px; height: 4px; left: 40%; top: 30%; animation-duration: 12s; animation-delay: 1.5s; }
+.particle--7 { width: 6px; height: 6px; left: 65%; top: 55%; animation-duration: 7s; animation-delay: 4s; }
+.particle--8 { width: 5px; height: 5px; left: 10%; top: 60%; animation-duration: 14s; animation-delay: 2.5s; }
+
+@keyframes particle-float {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { transform: translateY(-120px) scale(0.6); opacity: 0; }
+}
+
+/* ── Content ── */
+.landing-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 28px 120px;
+  max-width: 420px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease 0.2s, transform 0.7s ease 0.2s;
+}
+
+.landing-loaded .landing-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Logo ── */
+.landing-logo-wrap {
+  margin-bottom: 24px;
+}
+
+.landing-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  object-fit: contain;
+  background: rgba(15, 34, 16, 0.85);
+  padding: 10px;
+  border: 1.5px solid rgba(74, 222, 128, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(74, 222, 128, 0.1);
+  animation: logo-pulse 3s ease-in-out infinite;
+}
+
+@keyframes logo-pulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(74,222,128,0.1); }
+  50%       { box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 4px rgba(74,222,128,0.15); }
+}
+
+/* ── Badge ── */
+.landing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #4ade80;
+  margin-bottom: 20px;
+}
+
+.landing-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: badge-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes badge-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Title ── */
+.landing-title {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(42px, 11vw, 64px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  color: #f0fdf4;
+  margin: 0 0 16px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+
+.landing-title-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.landing-loaded .landing-title-line:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.4s; }
+.landing-loaded .landing-title-line:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.55s; }
+.landing-loaded .landing-title-line:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.7s; }
+
+.landing-title-accent {
+  color: #4ade80;
+  text-shadow: 0 0 40px rgba(74, 222, 128, 0.4);
+}
+
+/* ── Subtitle ── */
+.landing-subtitle {
+  font-size: 15px;
+  color: rgba(240, 253, 244, 0.7);
+  line-height: 1.6;
+  margin: 0 0 28px;
+  max-width: 320px;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.85s;
+}
+
+.landing-loaded .landing-subtitle { opacity: 1; }
+
+/* ── Stats ── */
+.landing-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(15, 34, 16, 0.6);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 16px;
+  padding: 14px 24px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: opacity 0.5s ease 1s;
+  width: 100%;
+  max-width: 320px;
+  justify-content: center;
+}
+
+.landing-loaded .landing-stats { opacity: 1; }
+
+.landing-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.landing-stat-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: #4ade80;
+  line-height: 1;
+}
+
+.landing-stat-lbl {
+  font-size: 10px;
+  color: rgba(240, 253, 244, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 4px;
+}
+
+.landing-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(74, 222, 128, 0.2);
+  margin: 0 8px;
+}
+
+/* ── CTA Buttons ── */
+.landing-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+  opacity: 0;
+  transition: opacity 0.5s ease 1.1s;
+}
+
+.landing-loaded .landing-cta { opacity: 1; }
+
+.landing-btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #15803d, #4ade80);
+  border: none;
+  border-radius: 16px;
+  padding: 17px 24px;
+  color: #052e16;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 24px rgba(74, 222, 128, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+
+.landing-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(74, 222, 128, 0.4);
+}
+
+.landing-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.landing-btn-secondary {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(240, 253, 244, 0.25);
+  border-radius: 16px;
+  padding: 15px 24px;
+  color: #f0fdf4;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, border-color 0.2s;
+  font-family: inherit;
+}
+
+.landing-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+/* ── Bottom hint ── */
+.landing-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.5s ease 1.3s;
+}
+
+.landing-loaded .landing-hint { opacity: 1; }
+
+.landing-hint span {
+  font-size: 11px;
+  color: rgba(240, 253, 244, 0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.landing-hint-bar {
+  width: 36px;
+  height: 4px;
+  background: rgba(240, 253, 244, 0.3);
+  border-radius: 100px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 380px) {
+  .landing-title { font-size: 38px; }
+  .landing-content { padding: 20px 20px 100px; }
+  .landing-logo { width: 72px; height: 72px; }
+}
